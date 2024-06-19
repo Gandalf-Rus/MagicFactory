@@ -19,8 +19,6 @@ public class Enemy : LifeObject
     {
         if (_target == null)
             FindBuilding();
-        else
-            MoveTowardsBuilding();
     }
 
     void FindBuilding()
@@ -32,12 +30,6 @@ public class Enemy : LifeObject
             if (_target != null)
                 break;
         }
-    }
-
-    void MoveTowardsBuilding()
-    {
-        if (_target != null)
-            transform.position = Vector3.MoveTowards(transform.position, _target.transform.position, _walkSpeed * Time.deltaTime);
     }
 
     void OnDrawGizmosSelected()
