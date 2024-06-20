@@ -1,40 +1,26 @@
 using UnityEngine;
 
+[RequireComponent(typeof(NavigationMovement))]
 public class Enemy : LifeObject
 {
     [SerializeField] EnemySettings _settings;
 
-    private float _detectionRadius;
-    private float _walkSpeed;
     private Building _target = null;
-    private Vector3 _direction;
+    private NavigationMovement _movement;
 
     private void Start()
     {
-        _walkSpeed = _settings.WalkSpeed;
-        _detectionRadius = _settings.DetectionRadius;
+        _movement = GetComponent<NavigationMovement>();
     }
 
-    void FixedUpdate()
+    private void OnTriggerEnter(Collider other)
     {
-        if (_target == null)
-            FindBuilding();
-    }
-
-    void FindBuilding()
-    {
-        Collider[] hitColliders = Physics.OverlapSphere(transform.position, _detectionRadius);
-        foreach (Collider hitCollider in hitColliders)
+        if (_target != null)
+            return;
+        if (other.TryGetComponent(out _target))
         {
-            _target = hitCollider.GetComponent<Building>();
-            if (_target != null)
-                break;
+            Debug.Log(_target.name);
+            _movement.SetTarget(_target.transform);
         }
-    }
-
-    void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, _detectionRadius);
     }
 }
