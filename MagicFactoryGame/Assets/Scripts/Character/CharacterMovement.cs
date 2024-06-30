@@ -36,44 +36,40 @@ public class CharacterMovement : LifeObject, IControllable, IMoveable
         _walkSpeed = _playerSettings.WalkSpeed;
         _runModifier = _playerSettings.RunModifier;
         _jumpHeight = _playerSettings.JumpHeight;
+        _speed = _walkSpeed;
     }
 
     private void FixedUpdate()
     {
-        _isGrounded = IsOnTheGround();
-
-        if (_isGrounded && _verticalVelocity < 0)
-        {
-            _verticalVelocity = _gravity;
-        }
-
-        else
-            ApplyGravity();
-        DoMove();
+        UpdateGroundStatus();
+        ApplyGravity();
+        MoveCharacter();
     }
 
-    private bool IsOnTheGround()
+    private void UpdateGroundStatus()
     {
-        return Physics.CheckSphere(_groundChecker.position, _checkGroundRadius, _groundMask); ;
+        _isGrounded = Physics.CheckSphere(_groundChecker.position, _checkGroundRadius, _groundMask);
+        if (_isGrounded && _verticalVelocity < 0)
+            _verticalVelocity = _gravity;
     }
 
     private void ApplyGravity()
     {
-        _verticalVelocity += _gravity * Time.fixedDeltaTime; // умножаем чтоб посчитать ускорение (v0+a*t)
+        if (!_isGrounded)
+            _verticalVelocity += _gravity * Time.fixedDeltaTime;
 
-        _characterController.Move(Vector3.up * _verticalVelocity * Time.fixedDeltaTime); // умножаем чтоб посчитать скорость (v*t)
+        _characterController.Move(Vector3.up * _verticalVelocity * Time.fixedDeltaTime);
     }
 
-    private void DoMove()
+    private void MoveCharacter()
     {
-        _characterController.Move(_moveDirection * _speed * Time.fixedDeltaTime);
+        _characterController.Move(_moveDirection * _speed * Time.deltaTime);
     }
 
     public void Jump()
     {
-        if (!_isGrounded)
-            return;
-        _verticalVelocity = Mathf.Sqrt(_jumpHeight * -2f * _gravity);
+        if (_isGrounded)
+            _verticalVelocity = Mathf.Sqrt(_jumpHeight * -2f * _gravity);
     }
 
     public void Move(Vector3 direction, bool isMoving)
@@ -81,7 +77,6 @@ public class CharacterMovement : LifeObject, IControllable, IMoveable
         _moveDirection = direction;
         if (_isMoving != isMoving)
         {
-            Debug.Log("State Changed");
             _isMoving = isMoving;
             OnMovementStateChanged?.Invoke(MovementState.Walk, isMoving);
         }
@@ -89,17 +84,9 @@ public class CharacterMovement : LifeObject, IControllable, IMoveable
 
     public void Run()
     {
-        if (_isRunActive)
-        {
-            _speed = _walkSpeed;
-            _isRunActive = false;
-        }
-        else
-        {
-            _speed += _walkSpeed * _runModifier;
-            _isRunActive = true;
-        }
-
+        _isRunActive = !_isRunActive;
+        Debug.Log(_isRunActive);
+        _speed = _isRunActive ? _walkSpeed * _runModifier : _walkSpeed;
         OnMovementStateChanged?.Invoke(MovementState.Run, _isRunActive);
     }
 }

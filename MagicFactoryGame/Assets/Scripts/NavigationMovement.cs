@@ -10,6 +10,7 @@ public class NavigationMovement : MonoBehaviour
     private void Start()
     {
         _agent = GetComponent<NavMeshAgent>();
+        _agent.updateUpAxis = false;
     }
 
     private void Update()

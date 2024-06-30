@@ -14,5 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _health: 100
   _walkSpeed: 5
-  _runModifier: 1
+  _runModifier: 2
   _jumpHeight: 3

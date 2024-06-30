@@ -1,16 +1,25 @@
+using System;
 using UnityEngine;
 
 [RequireComponent(typeof(NavigationMovement))]
-public class Enemy : LifeObject
+[RequireComponent (typeof(CapsuleCollider))]
+[RequireComponent(typeof(Rigidbody))]
+public class Enemy : LifeObject, IPoolObject
 {
-    [SerializeField] EnemySettings _settings;
+    [SerializeField] private EnemySettings _settings;
+    [SerializeField] private Transform _baseTarget;
 
     private Building _target = null;
     private NavigationMovement _movement;
 
-    private void Start()
+    public Type ItemType => GetType();
+    public GameObject GameObject => gameObject;
+
+    private void Awake()
     {
         _movement = GetComponent<NavigationMovement>();
+        if (_target == null)
+            _movement.SetTarget(_baseTarget);
     }
 
     private void OnTriggerEnter(Collider other)
